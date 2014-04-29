@@ -5,7 +5,7 @@ import (
 )
 
 func TestMapBasic(t *testing.T) {
-	m := NewMap(0)
+	m := NewMap(0, 0)
 	// Insert values.
 	for i := 0; i < 1000; i++ {
 		*m.FindOrInsert(Key(i)) = Value(i + 1)

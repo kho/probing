@@ -11,6 +11,7 @@ var (
 	numKeys       = flag.Int("keys", 1e6, "number of unique keys to insert")
 	numInQueries  = flag.Int("in", 1e3, "number of in-map queries")
 	numOutQueries = flag.Int("out", 1e3, "number of out-of-map queries")
+	scale         = flag.Float64("scale", 1.5, "scale to compute init bucket size")
 	seed          = flag.Int64("seed", 0, "seed to random number generator")
 )
 
@@ -70,7 +71,7 @@ func BenchmarkGoMap(b *testing.B) {
 
 func BenchmarkProbingMap(b *testing.B) {
 	fillData()
-	m := NewMap(1 << 15)
+	m := NewMap(int(*scale*float64(*numKeys)), 0)
 	for _, k := range keys {
 		*m.FindOrInsert(k) = Value(k + 1)
 	}
@@ -101,7 +102,7 @@ func BenchmarkMapMem(b *testing.B) {
 	func() {
 		var m *Map
 		measureMem("probing", func() {
-			m = NewMap(1 << 15)
+			m = NewMap(int(*scale*float64(*numKeys)), 0)
 			for _, k := range keys {
 				*m.FindOrInsert(k) = Value(k + 1)
 			}

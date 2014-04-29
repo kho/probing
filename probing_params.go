@@ -3,10 +3,7 @@ package probing
 type Key uint64
 type Value uint64
 
-const (
-	KEY_NIL               = ^Key(0)
-	_THRESHOLD_MULTIPLIER = 0.618
-)
+const KEY_NIL = ^Key(0)
 
 func hash(k Key) uint {
 	// hash64shift from

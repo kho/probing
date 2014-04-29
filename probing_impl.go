@@ -12,12 +12,15 @@ type Map struct {
 	numEntries, threshold int
 }
 
-func NewMap(initNumBuckets int) *Map {
+func NewMap(initNumBuckets int, maxUsed float64) *Map {
 	if initNumBuckets < 2 {
 		initNumBuckets = 2
 	}
-	// threshold = min(max(1, (initNumBuckets-1) * _THRESHOLD_MULTIPLIER), initNumBuckets-1)
-	threshold := int(float64(initNumBuckets-1) * _THRESHOLD_MULTIPLIER)
+	if maxUsed <= 0 || maxUsed >= 1 {
+		maxUsed = 0.8
+	}
+	// threshold = min(max(1, (initNumBuckets-1) * maxUsed), initNumBuckets-1)
+	threshold := int(float64(initNumBuckets-1) * maxUsed)
 	if threshold < 1 {
 		threshold = 1
 	}
