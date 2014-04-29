@@ -12,24 +12,19 @@ type Map struct {
 	numEntries, threshold int
 }
 
-func NewMap(initSize int) *Map {
-	// numBuckets = max(2, initSize*ALLOC, initSize+1)
-	numBuckets := int(float64(initSize) * _ALLOC_MULTIPLIER)
-	if numBuckets < 2 {
-		numBuckets = 2
+func NewMap(initNumBuckets int) *Map {
+	if initNumBuckets < 2 {
+		initNumBuckets = 2
 	}
-	if numBuckets < initSize+1 {
-		numBuckets = initSize + 1
-	}
-	// threshold = min(max(1, initSize*THRESH), numBuckets-1)
-	threshold := int(float64(initSize) * _THRESHOLD_MULTIPLIER)
+	// threshold = min(max(1, (initNumBuckets-1) * _THRESHOLD_MULTIPLIER), initNumBuckets-1)
+	threshold := int(float64(initNumBuckets-1) * _THRESHOLD_MULTIPLIER)
 	if threshold < 1 {
 		threshold = 1
 	}
-	if threshold > numBuckets-1 {
-		threshold = numBuckets - 1
+	if threshold > initNumBuckets-1 {
+		threshold = initNumBuckets - 1
 	}
-	return &Map{initBuckets(numBuckets), 0, threshold}
+	return &Map{initBuckets(initNumBuckets), 0, threshold}
 }
 
 func (m *Map) Size() int {

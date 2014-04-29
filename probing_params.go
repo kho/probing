@@ -5,8 +5,7 @@ type Value uint64
 
 const (
 	KEY_NIL               = ^Key(0)
-	_ALLOC_MULTIPLIER     = 1.5
-	_THRESHOLD_MULTIPLIER = 1.2
+	_THRESHOLD_MULTIPLIER = 0.618
 )
 
 func hash(k Key) uint {
