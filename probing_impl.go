@@ -1,8 +1,11 @@
 package probing
 
-import ()
+import (
+	"bytes"
+	"encoding/gob"
+)
 
-type entry struct {
+type Entry struct {
 	Key   Key
 	Value Value
 }
@@ -50,12 +53,54 @@ func (m *Map) FindOrInsert(k Key) *Value {
 	return m.insert(k)
 }
 
+func (m *Map) Range() chan Entry {
+	out := make(chan Entry)
+	go func() {
+		for _, e := range m.buckets {
+			if e.Key != KEY_NIL {
+				out <- e
+			}
+		}
+		close(out)
+	}()
+	return out
+}
+
+func (m *Map) MarshalBinary() (data []byte, err error) {
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	if err = enc.Encode(m.buckets); err != nil {
+		return
+	}
+	if err = enc.Encode(m.numEntries); err != nil {
+		return
+	}
+	if err = enc.Encode(m.threshold); err != nil {
+		return
+	}
+	return buf.Bytes(), nil
+}
+
+func (m *Map) UnmarshalBinary(data []byte) (err error) {
+	dec := gob.NewDecoder(bytes.NewReader(data))
+	if err = dec.Decode(&m.buckets); err != nil {
+		return
+	}
+	if err = dec.Decode(&m.numEntries); err != nil {
+		return
+	}
+	if err = dec.Decode(&m.threshold); err != nil {
+		return
+	}
+	return nil
+}
+
 func (m *Map) insert(k Key) *Value {
 	if m.numEntries >= m.threshold {
 		m.double()
 	}
 	ei := m.buckets.nextAvailable(k)
-	*ei = entry{Key: k}
+	*ei = Entry{Key: k}
 	m.numEntries++
 	return &ei.Value
 }
@@ -73,7 +118,7 @@ func (m *Map) double() {
 	m.threshold *= 2
 }
 
-type buckets []entry
+type buckets []Entry
 
 func initBuckets(n int) buckets {
 	s := make(buckets, n)
@@ -131,7 +176,7 @@ func (b buckets) start(k Key) int {
 	return int(hash(k) % uint(len(b)))
 }
 
-func (b buckets) nextAvailable(k Key) *entry {
+func (b buckets) nextAvailable(k Key) *Entry {
 	i := b.start(k)
 	for {
 		ei := &b[i]

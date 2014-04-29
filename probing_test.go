@@ -45,13 +45,22 @@ func TestMapBasic(t *testing.T) {
 			t.Errorf("ConstFind(%d) should be not ok ", i)
 		}
 	}
+	// Ranging over entries.
+	for e := range m.Range() {
+		if e.Key == KEY_NIL || e.Key < 0 || e.Key >= 1000 {
+			t.Errorf("invalid key: %d", e.Key)
+		}
+		if Value(e.Key+1) != e.Value {
+			t.Errorf("invalid entry: %+v", e)
+		}
+	}
 }
 
 func Test_bucketsRollOver(t *testing.T) {
 	b := initBuckets(4)
-	b[2] = entry{0, 1}
-	b[3] = entry{0, 1}
-	*b.nextAvailable(1) = entry{1, 2}
+	b[2] = Entry{0, 1}
+	b[3] = Entry{0, 1}
+	*b.nextAvailable(1) = Entry{1, 2}
 	if _, ok := b.ConstFind(1); !ok {
 		t.Error("cannot find Key(1)")
 	}
