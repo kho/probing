@@ -5,17 +5,17 @@ import (
 	"encoding/gob"
 )
 
-type Entry struct {
-	Key   Key
-	Value Value
+type __Entry struct {
+	Key   __Key
+	Value __Value
 }
 
-type Map struct {
-	buckets               buckets
+type __Map struct {
+	buckets               __buckets
 	numEntries, threshold int
 }
 
-func NewMap(initNumBuckets int, maxUsed float64) *Map {
+func __NewMap(initNumBuckets int, maxUsed float64) *__Map {
 	if initNumBuckets < 2 {
 		initNumBuckets = 2
 	}
@@ -30,22 +30,22 @@ func NewMap(initNumBuckets int, maxUsed float64) *Map {
 	if threshold > initNumBuckets-1 {
 		threshold = initNumBuckets - 1
 	}
-	return &Map{initBuckets(initNumBuckets), 0, threshold}
+	return &__Map{__initBuckets(initNumBuckets), 0, threshold}
 }
 
-func (m *Map) Size() int {
+func (m *__Map) Size() int {
 	return m.numEntries
 }
 
-func (m *Map) Find(k Key) *Value {
+func (m *__Map) Find(k __Key) *__Value {
 	return m.buckets.Find(k)
 }
 
-func (m *Map) ConstFind(k Key) (Value, bool) {
+func (m *__Map) ConstFind(k __Key) (__Value, bool) {
 	return m.buckets.ConstFind(k)
 }
 
-func (m *Map) FindOrInsert(k Key) *Value {
+func (m *__Map) FindOrInsert(k __Key) *__Value {
 	v := m.Find(k)
 	if v != nil {
 		return v
@@ -53,11 +53,11 @@ func (m *Map) FindOrInsert(k Key) *Value {
 	return m.insert(k)
 }
 
-func (m *Map) Range() chan Entry {
-	out := make(chan Entry)
+func (m *__Map) Range() chan __Entry {
+	out := make(chan __Entry)
 	go func() {
 		for _, e := range m.buckets {
-			if e.Key != KEY_NIL {
+			if e.Key != __KEY_NIL {
 				out <- e
 			}
 		}
@@ -66,7 +66,7 @@ func (m *Map) Range() chan Entry {
 	return out
 }
 
-func (m *Map) MarshalBinary() (data []byte, err error) {
+func (m *__Map) MarshalBinary() (data []byte, err error) {
 	var buf bytes.Buffer
 	enc := gob.NewEncoder(&buf)
 	if err = enc.Encode(m.buckets); err != nil {
@@ -81,7 +81,7 @@ func (m *Map) MarshalBinary() (data []byte, err error) {
 	return buf.Bytes(), nil
 }
 
-func (m *Map) UnmarshalBinary(data []byte) (err error) {
+func (m *__Map) UnmarshalBinary(data []byte) (err error) {
 	dec := gob.NewDecoder(bytes.NewReader(data))
 	if err = dec.Decode(&m.buckets); err != nil {
 		return
@@ -95,21 +95,21 @@ func (m *Map) UnmarshalBinary(data []byte) (err error) {
 	return nil
 }
 
-func (m *Map) insert(k Key) *Value {
+func (m *__Map) insert(k __Key) *__Value {
 	if m.numEntries >= m.threshold {
 		m.double()
 	}
 	ei := m.buckets.nextAvailable(k)
-	*ei = Entry{Key: k}
+	*ei = __Entry{Key: k}
 	m.numEntries++
 	return &ei.Value
 }
 
-func (m *Map) double() {
-	buckets := initBuckets(len(m.buckets) * 2)
+func (m *__Map) double() {
+	buckets := __initBuckets(len(m.buckets) * 2)
 	for _, e := range m.buckets {
 		k := e.Key
-		if !equal(k, KEY_NIL) {
+		if !__equal(k, __KEY_NIL) {
 			dst := buckets.nextAvailable(k)
 			*dst = e
 		}
@@ -118,26 +118,26 @@ func (m *Map) double() {
 	m.threshold *= 2
 }
 
-type buckets []Entry
+type __buckets []__Entry
 
-func initBuckets(n int) buckets {
-	s := make(buckets, n)
+func __initBuckets(n int) __buckets {
+	s := make(__buckets, n)
 	for i := range s {
-		s[i].Key = KEY_NIL
+		s[i].Key = __KEY_NIL
 	}
 	return s
 }
 
-func (b buckets) Find(k Key) (v *Value) {
+func (b __buckets) Find(k __Key) (v *__Value) {
 	i := b.start(k)
 	for {
 		// Maybe switch to range to trade 1 bound check for 1 copy?
 		ei := &b[i]
 		ki := ei.Key
-		if equal(ki, k) {
+		if __equal(ki, k) {
 			return &ei.Value
 		}
-		if equal(ki, KEY_NIL) {
+		if __equal(ki, __KEY_NIL) {
 			return nil
 		}
 		i++
@@ -147,40 +147,40 @@ func (b buckets) Find(k Key) (v *Value) {
 	}
 }
 
-func (b buckets) ConstFind(k Key) (Value, bool) {
+func (b __buckets) ConstFind(k __Key) (__Value, bool) {
 	i := b.start(k)
 	for _, e := range b[i:] {
 		ki := e.Key
-		if equal(ki, k) {
+		if __equal(ki, k) {
 			return e.Value, true
 		}
-		if equal(ki, KEY_NIL) {
-			var v Value
+		if __equal(ki, __KEY_NIL) {
+			var v __Value
 			return v, false
 		}
 	}
 	for _, e := range b[:i] {
 		ki := e.Key
-		if equal(ki, k) {
+		if __equal(ki, k) {
 			return e.Value, true
 		}
-		if equal(ki, KEY_NIL) {
-			var v Value
+		if __equal(ki, __KEY_NIL) {
+			var v __Value
 			return v, false
 		}
 	}
 	panic("impossible")
 }
 
-func (b buckets) start(k Key) int {
-	return int(hash(k) % uint(len(b)))
+func (b __buckets) start(k __Key) int {
+	return int(__hash(k) % uint(len(b)))
 }
 
-func (b buckets) nextAvailable(k Key) *Entry {
+func (b __buckets) nextAvailable(k __Key) *__Entry {
 	i := b.start(k)
 	for {
 		ei := &b[i]
-		if equal(ei.Key, KEY_NIL) {
+		if __equal(ei.Key, __KEY_NIL) {
 			return ei
 		}
 		i++

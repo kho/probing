@@ -1,11 +1,11 @@
 package probing
 
-type Key uint64
-type Value uint64
+type __Key uint64
+type __Value uint64
 
-const KEY_NIL = ^Key(0)
+const __KEY_NIL = ^__Key(0)
 
-func hash(k Key) uint {
+func __hash(k __Key) uint {
 	// hash64shift from
 	// https://web.archive.org/web/20120903003157/http://www.cris.com/~Ttwang/tech/inthash.htm.
 	r := uint64(k) // make sure >> is logical.
@@ -19,6 +19,6 @@ func hash(k Key) uint {
 	return uint(r)
 }
 
-func equal(a, b Key) bool {
+func __equal(a, b __Key) bool {
 	return a == b
 }

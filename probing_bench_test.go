@@ -16,7 +16,7 @@ var (
 )
 
 var (
-	keys, inQs, outQs []Key
+	keys, inQs, outQs []__Key
 	filled            bool
 )
 
@@ -24,11 +24,11 @@ func fillData() {
 	if filled {
 		return
 	}
-	seen := map[Key]bool{}
+	seen := map[__Key]bool{}
 	rng := rand.New(rand.NewSource(*seed))
 	for len(keys) < *numKeys {
-		k := Key(rng.Int())
-		if k == KEY_NIL {
+		k := __Key(rng.Int())
+		if k == __KEY_NIL {
 			continue
 		}
 		if !seen[k] {
@@ -41,8 +41,8 @@ func fillData() {
 		inQs = append(inQs, k)
 	}
 	for len(outQs) < *numOutQueries {
-		k := Key(rng.Int())
-		if k == KEY_NIL {
+		k := __Key(rng.Int())
+		if k == __KEY_NIL {
 			continue
 		}
 		if !seen[k] {
@@ -54,9 +54,9 @@ func fillData() {
 
 func BenchmarkGoMap(b *testing.B) {
 	fillData()
-	m := make(map[Key]Value)
+	m := make(map[__Key]__Value)
 	for _, k := range keys {
-		m[k] = Value(k + 1)
+		m[k] = __Value(k + 1)
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -71,9 +71,9 @@ func BenchmarkGoMap(b *testing.B) {
 
 func BenchmarkProbingMap(b *testing.B) {
 	fillData()
-	m := NewMap(int(*scale*float64(*numKeys)), 0)
+	m := __NewMap(int(*scale*float64(*numKeys)), 0)
 	for _, k := range keys {
-		*m.FindOrInsert(k) = Value(k + 1)
+		*m.FindOrInsert(k) = __Value(k + 1)
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -90,21 +90,21 @@ func BenchmarkMapMem(b *testing.B) {
 	fillData()
 
 	func() {
-		var m map[Key]Value
+		var m map[__Key]__Value
 		measureMem("go-map", func() {
-			m = make(map[Key]Value)
+			m = make(map[__Key]__Value)
 			for _, k := range keys {
-				m[k] = Value(k + 1)
+				m[k] = __Value(k + 1)
 			}
 		}, b)
 	}()
 
 	func() {
-		var m *Map
+		var m *__Map
 		measureMem("probing", func() {
-			m = NewMap(int(*scale*float64(*numKeys)), 0)
+			m = __NewMap(int(*scale*float64(*numKeys)), 0)
 			for _, k := range keys {
-				*m.FindOrInsert(k) = Value(k + 1)
+				*m.FindOrInsert(k) = __Value(k + 1)
 			}
 			b.Logf("probing: %d keys; %d buckets", m.Size(), len(m.buckets))
 		}, b)
