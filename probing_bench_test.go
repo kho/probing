@@ -12,6 +12,7 @@ var (
 	numInQueries  = flag.Int("in", 1e3, "number of in-map queries")
 	numOutQueries = flag.Int("out", 1e3, "number of out-of-map queries")
 	scale         = flag.Float64("scale", 1.5, "scale to compute init bucket size")
+	load          = flag.Float64("load", 0, "load factor ( <= 0 or >= 1 means default)")
 	seed          = flag.Int64("seed", 0, "seed to random number generator")
 )
 
@@ -52,6 +53,14 @@ func fillData() {
 	filled = true
 }
 
+func testMap() *__Map {
+	m := __NewMap(int(*scale*float64(*numKeys)), *load)
+	for _, k := range keys {
+		*m.FindOrInsert(k) = __Value(k + 1)
+	}
+	return m
+}
+
 func BenchmarkGoMap(b *testing.B) {
 	fillData()
 	m := make(map[__Key]__Value)
@@ -71,10 +80,12 @@ func BenchmarkGoMap(b *testing.B) {
 
 func BenchmarkProbingMap(b *testing.B) {
 	fillData()
-	m := __NewMap(int(*scale*float64(*numKeys)), 0)
+	m := testMap()
 	for _, k := range keys {
 		*m.FindOrInsert(k) = __Value(k + 1)
 	}
+	// numLookUps = 0
+	// numCollisions = 0
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		for _, k := range inQs {
@@ -84,6 +95,7 @@ func BenchmarkProbingMap(b *testing.B) {
 			_ = m.Find(k)
 		}
 	}
+	// b.Logf("%.2f hashes per look-up", float64(numLookUps+numCollisions)/float64(numLookUps))
 }
 
 func BenchmarkMapMem(b *testing.B) {
@@ -102,11 +114,8 @@ func BenchmarkMapMem(b *testing.B) {
 	func() {
 		var m *__Map
 		measureMem("probing", func() {
-			m = __NewMap(int(*scale*float64(*numKeys)), 0)
-			for _, k := range keys {
-				*m.FindOrInsert(k) = __Value(k + 1)
-			}
-			b.Logf("probing: %d keys; %d buckets", m.Size(), len(m.buckets))
+			m = testMap()
+			b.Logf("probing: %d keys; %d buckets; load factor %.2f", m.Size(), len(m.buckets), float64(m.Size())/float64(len(m.buckets)))
 		}, b)
 	}()
 
