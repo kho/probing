@@ -27,22 +27,12 @@ func Test__MapBasic(t *testing.T) {
 		} else if *v != __Value(i+1) {
 			t.Errorf("expect Find(%d) = %d; got %d", i, i+1, *v)
 		}
-		vv, ok := m.ConstFind(__Key(i))
-		if !ok {
-			t.Errorf("ConstFind(%d) should be ok ", i)
-		} else if vv != __Value(i+1) {
-			t.Errorf("expect ConstFind(%d) = %d; got %d", i, i+1, vv)
-		}
 	}
 	// Find non-existent.
 	for i := 1000; i < 2000; i++ {
 		v := m.Find(__Key(i))
 		if v != nil {
 			t.Errorf("Find(%d) should be nil", i)
-		}
-		_, ok := m.ConstFind(__Key(i))
-		if ok {
-			t.Errorf("ConstFind(%d) should be not ok ", i)
 		}
 	}
 	// Ranging over entries.
@@ -61,15 +51,15 @@ func Test___bucketsRollOver(t *testing.T) {
 	b[2] = __Entry{0, 1}
 	b[3] = __Entry{0, 1}
 	*b.nextAvailable(1) = __Entry{1, 2}
-	if _, ok := b.ConstFind(1); !ok {
+	if b.Find(1) == nil {
 		t.Error("cannot find __Key(1)")
 	}
 	for i := 2; i < 100; i++ {
 		if b.Find(__Key(i)) != nil {
 			t.Errorf("Find(%d) should be nil", i)
 		}
-		if _, ok := b.ConstFind(__Key(i)); ok {
-			t.Errorf("ConstFind(%d) should not be ok", i)
+		if b.Find(__Key(i)) != nil {
+			t.Errorf("Find(%d) should be nil", i)
 		}
 		if n := b.nextAvailable(__Key(i)); n.Value != 0 {
 			t.Errorf("expect nextAvailable(%d).Value = 0; got %d", i, n.Value)

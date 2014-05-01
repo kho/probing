@@ -41,10 +41,6 @@ func (m *__Map) Find(k __Key) *__Value {
 	return m.buckets.Find(k)
 }
 
-func (m *__Map) ConstFind(k __Key) (__Value, bool) {
-	return m.buckets.ConstFind(k)
-}
-
 func (m *__Map) FindOrInsert(k __Key) *__Value {
 	v := m.Find(k)
 	if v != nil {
@@ -128,7 +124,10 @@ func __initBuckets(n int) __buckets {
 	return s
 }
 
+// var numLookUps, numCollisions int
+
 func (b __buckets) Find(k __Key) (v *__Value) {
+	// numLookUps++
 	i := b.start(k)
 	for {
 		// Maybe switch to range to trade 1 bound check for 1 copy?
@@ -140,36 +139,12 @@ func (b __buckets) Find(k __Key) (v *__Value) {
 		if __equal(ki, __KEY_NIL) {
 			return nil
 		}
+		// numCollisions++
 		i++
 		if i == len(b) {
 			i = 0
 		}
 	}
-}
-
-func (b __buckets) ConstFind(k __Key) (__Value, bool) {
-	i := b.start(k)
-	for _, e := range b[i:] {
-		ki := e.Key
-		if __equal(ki, k) {
-			return e.Value, true
-		}
-		if __equal(ki, __KEY_NIL) {
-			var v __Value
-			return v, false
-		}
-	}
-	for _, e := range b[:i] {
-		ki := e.Key
-		if __equal(ki, k) {
-			return e.Value, true
-		}
-		if __equal(ki, __KEY_NIL) {
-			var v __Value
-			return v, false
-		}
-	}
-	panic("impossible")
 }
 
 func (b __buckets) start(k __Key) int {
