@@ -47,7 +47,7 @@ func Test__MapBasic(t *testing.T) {
 }
 
 func Test___bucketsRollOver(t *testing.T) {
-	b := __initBuckets(4)
+	b := __InitBuckets(4)
 	b[2] = __Entry{0, 1}
 	b[3] = __Entry{0, 1}
 	*b.nextAvailable(1) = __Entry{1, 2}
