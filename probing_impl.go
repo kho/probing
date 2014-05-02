@@ -30,7 +30,7 @@ func New__Map(initNumBuckets int, maxUsed float64) *__Map {
 	if threshold > initNumBuckets-1 {
 		threshold = initNumBuckets - 1
 	}
-	return &__Map{__initBuckets(initNumBuckets), 0, threshold}
+	return &__Map{__InitBuckets(initNumBuckets), 0, threshold}
 }
 
 func (m *__Map) Size() int {
@@ -90,7 +90,7 @@ func (m *__Map) UnmarshalBinary(data []byte) (err error) {
 }
 
 func (m *__Map) double() {
-	buckets := __initBuckets(len(m.buckets) * 2)
+	buckets := __InitBuckets(len(m.buckets) * 2)
 	for _, e := range m.buckets {
 		k := e.Key
 		if !__Equal(k, __KEY_NIL) {
@@ -104,12 +104,21 @@ func (m *__Map) double() {
 
 type __Buckets []__Entry
 
-func __initBuckets(n int) __Buckets {
+func __InitBuckets(n int) __Buckets {
 	s := make(__Buckets, n)
 	for i := range s {
 		s[i].Key = __KEY_NIL
 	}
 	return s
+}
+
+func (b __Buckets) Size() (n int) {
+	for _, e := range b {
+		if e.Key != __KEY_NIL {
+			n++
+		}
+	}
+	return
 }
 
 // var numLookUps, numCollisions int
