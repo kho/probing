@@ -54,7 +54,7 @@ func fillData() {
 }
 
 func testMap() *__Map {
-	m := __NewMap(int(*scale*float64(*numKeys)), *load)
+	m := New__Map(int(*scale*float64(*numKeys)), *load)
 	for _, k := range keys {
 		*m.FindOrInsert(k) = __Value(k + 1)
 	}

@@ -5,7 +5,7 @@ type __Value uint64
 
 const __KEY_NIL = ^__Key(0)
 
-func __hash(k __Key) uint {
+func __Hash(k __Key) uint {
 	// https://code.google.com/p/fast-hash
 	h := uint64(k)
 	h ^= h >> 23
@@ -14,6 +14,6 @@ func __hash(k __Key) uint {
 	return uint(h)
 }
 
-func __equal(a, b __Key) bool {
+func __Equal(a, b __Key) bool {
 	return a == b
 }

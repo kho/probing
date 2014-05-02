@@ -11,11 +11,11 @@ type __Entry struct {
 }
 
 type __Map struct {
-	buckets               __buckets
+	buckets               __Buckets
 	numEntries, threshold int
 }
 
-func __NewMap(initNumBuckets int, maxUsed float64) *__Map {
+func New__Map(initNumBuckets int, maxUsed float64) *__Map {
 	if initNumBuckets < 2 {
 		initNumBuckets = 2
 	}
@@ -42,24 +42,22 @@ func (m *__Map) Find(k __Key) *__Value {
 }
 
 func (m *__Map) FindOrInsert(k __Key) *__Value {
-	v := m.Find(k)
-	if v != nil {
-		return v
+	e := m.buckets.FindEntry(k)
+	if e.Key != __KEY_NIL {
+		return &e.Value
 	}
-	return m.insert(k)
+	// Need to insert.
+	if m.numEntries >= m.threshold {
+		m.double()
+		e = m.buckets.nextAvailable(k)
+	}
+	*e = __Entry{Key: k}
+	m.numEntries++
+	return &e.Value
 }
 
 func (m *__Map) Range() chan __Entry {
-	out := make(chan __Entry)
-	go func() {
-		for _, e := range m.buckets {
-			if e.Key != __KEY_NIL {
-				out <- e
-			}
-		}
-		close(out)
-	}()
-	return out
+	return m.buckets.Range()
 }
 
 func (m *__Map) MarshalBinary() (data []byte, err error) {
@@ -91,21 +89,11 @@ func (m *__Map) UnmarshalBinary(data []byte) (err error) {
 	return nil
 }
 
-func (m *__Map) insert(k __Key) *__Value {
-	if m.numEntries >= m.threshold {
-		m.double()
-	}
-	ei := m.buckets.nextAvailable(k)
-	*ei = __Entry{Key: k}
-	m.numEntries++
-	return &ei.Value
-}
-
 func (m *__Map) double() {
 	buckets := __initBuckets(len(m.buckets) * 2)
 	for _, e := range m.buckets {
 		k := e.Key
-		if !__equal(k, __KEY_NIL) {
+		if !__Equal(k, __KEY_NIL) {
 			dst := buckets.nextAvailable(k)
 			*dst = e
 		}
@@ -114,10 +102,10 @@ func (m *__Map) double() {
 	m.threshold *= 2
 }
 
-type __buckets []__Entry
+type __Buckets []__Entry
 
-func __initBuckets(n int) __buckets {
-	s := make(__buckets, n)
+func __initBuckets(n int) __Buckets {
+	s := make(__Buckets, n)
 	for i := range s {
 		s[i].Key = __KEY_NIL
 	}
@@ -126,17 +114,17 @@ func __initBuckets(n int) __buckets {
 
 // var numLookUps, numCollisions int
 
-func (b __buckets) Find(k __Key) (v *__Value) {
+func (b __Buckets) Find(k __Key) (v *__Value) {
 	// numLookUps++
 	i := b.start(k)
 	for {
 		// Maybe switch to range to trade 1 bound check for 1 copy?
 		ei := &b[i]
 		ki := ei.Key
-		if __equal(ki, k) {
+		if __Equal(ki, k) {
 			return &ei.Value
 		}
-		if __equal(ki, __KEY_NIL) {
+		if __Equal(ki, __KEY_NIL) {
 			return nil
 		}
 		// numCollisions++
@@ -147,15 +135,43 @@ func (b __buckets) Find(k __Key) (v *__Value) {
 	}
 }
 
-func (b __buckets) start(k __Key) int {
-	return int(__hash(k) % uint(len(b)))
-}
-
-func (b __buckets) nextAvailable(k __Key) *__Entry {
+func (b __Buckets) FindEntry(k __Key) *__Entry {
 	i := b.start(k)
 	for {
 		ei := &b[i]
-		if __equal(ei.Key, __KEY_NIL) {
+		ki := ei.Key
+		if __Equal(ki, k) || __Equal(ki, __KEY_NIL) {
+			return ei
+		}
+		i++
+		if i == len(b) {
+			i = 0
+		}
+	}
+}
+
+func (b __Buckets) Range() chan __Entry {
+	ch := make(chan __Entry)
+	go func() {
+		for _, e := range b {
+			if e.Key != __KEY_NIL {
+				ch <- e
+			}
+		}
+		close(ch)
+	}()
+	return ch
+}
+
+func (b __Buckets) start(k __Key) int {
+	return int(__Hash(k) % uint(len(b)))
+}
+
+func (b __Buckets) nextAvailable(k __Key) *__Entry {
+	i := b.start(k)
+	for {
+		ei := &b[i]
+		if __Equal(ei.Key, __KEY_NIL) {
 			return ei
 		}
 		i++
