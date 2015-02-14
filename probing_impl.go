@@ -15,6 +15,8 @@ type __Map struct {
 	numEntries, threshold int
 }
 
+const __DefaultLoadFactor = 0.8
+
 func New__Map(initNumBuckets int, maxUsed float64) *__Map {
 	if initNumBuckets == 0 {
 		initNumBuckets = 4
@@ -22,7 +24,7 @@ func New__Map(initNumBuckets int, maxUsed float64) *__Map {
 		initNumBuckets = 2
 	}
 	if maxUsed <= 0 || maxUsed >= 1 {
-		maxUsed = 0.8
+		maxUsed = __DefaultLoadFactor
 	}
 	// threshold = min(max(1, initNumBuckets * maxUsed), initNumBuckets-1)
 	threshold := int(float64(initNumBuckets) * maxUsed)
