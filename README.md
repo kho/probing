@@ -25,41 +25,71 @@ Summary: the probing hash table is,
 3. Faster on larger maps.
 
 ```
-$ for s in 1.5 2; do for k in 1000000 10000000; do go test -bench=. -gcflags='-l -l -l -l -l' -keys=$k -scale=$s; done; done
+$ for s in 1.5 2; do for k in 1000 1000000 10000000; do go test -bench=. -gcflags='-l -l -l -l -l' -keys=$k -scale=$s; done; done
 PASS
-BenchmarkGoMap	   20000	     97371 ns/op
-BenchmarkProbingMap	   10000	    109566 ns/op
-BenchmarkMapMem	       0	         0 ns/op
---- BENCH: BenchmarkMapMem
-	probing_bench_test.go:111: go-map: 36.74MB
-	probing_bench_test.go:129: probing: 1000000 keys; 1500000 buckets; load factor 0.67
-	probing_bench_test.go:119: probing: 22.88MB
-ok  	github.com/kho/probing	7.009s
+BenchmarkGoMapSpeed	   20000	     72026 ns/op
+BenchmarkProbingMapSpeed	   20000	     78436 ns/op
+BenchmarkGoMapMem	       0	         0 ns/op
+--- BENCH: BenchmarkGoMapMem
+	probing_bench_test.go:143: go-map: 0.04MB
+BenchmarkProbingMapMem	       0	         0 ns/op
+--- BENCH: BenchmarkProbingMapMem
+	probing_bench_test.go:127: probing: 1000 keys; 1500 buckets; load factor 0.67
+	probing_bench_test.go:143: probing: 0.02MB
+ok  	github.com/kho/probing	4.561s
 PASS
-BenchmarkGoMap	   10000	    120579 ns/op
-BenchmarkProbingMap	   10000	    124704 ns/op
-BenchmarkMapMem	       0	         0 ns/op
---- BENCH: BenchmarkMapMem
-	probing_bench_test.go:111: go-map: 304.63MB
-	probing_bench_test.go:129: probing: 10000000 keys; 15000000 buckets; load factor 0.67
-	probing_bench_test.go:119: probing: 228.51MB
-ok  	github.com/kho/probing	32.110s
+BenchmarkGoMapSpeed	   10000	    115136 ns/op
+BenchmarkProbingMapSpeed	   10000	    110323 ns/op
+BenchmarkGoMapMem	       0	         0 ns/op
+--- BENCH: BenchmarkGoMapMem
+	probing_bench_test.go:143: go-map: 36.58MB
+BenchmarkProbingMapMem	       0	         0 ns/op
+--- BENCH: BenchmarkProbingMapMem
+	probing_bench_test.go:127: probing: 1000000 keys; 1500000 buckets; load factor 0.67
+	probing_bench_test.go:143: probing: 22.89MB
+ok  	github.com/kho/probing	5.609s
 PASS
-BenchmarkGoMap	   20000	     98238 ns/op
-BenchmarkProbingMap	   20000	     86263 ns/op
-BenchmarkMapMem	       0	         0 ns/op
---- BENCH: BenchmarkMapMem
-	probing_bench_test.go:111: go-map: 36.73MB
-	probing_bench_test.go:129: probing: 1000000 keys; 2000000 buckets; load factor 0.50
-	probing_bench_test.go:119: probing: 30.51MB
-ok  	github.com/kho/probing	8.743s
+BenchmarkGoMapSpeed	   10000	    137659 ns/op
+BenchmarkProbingMapSpeed	   10000	    131698 ns/op
+BenchmarkGoMapMem	       0	         0 ns/op
+--- BENCH: BenchmarkGoMapMem
+	probing_bench_test.go:143: go-map: 303.56MB
+BenchmarkProbingMapMem	       0	         0 ns/op
+--- BENCH: BenchmarkProbingMapMem
+	probing_bench_test.go:127: probing: 10000000 keys; 15000000 buckets; load factor 0.67
+	probing_bench_test.go:143: probing: 228.88MB
+ok  	github.com/kho/probing	38.949s
 PASS
-BenchmarkGoMap	   10000	    121225 ns/op
-BenchmarkProbingMap	   20000	    100018 ns/op
-BenchmarkMapMem	       0	         0 ns/op
---- BENCH: BenchmarkMapMem
-	probing_bench_test.go:111: go-map: 304.67MB
-	probing_bench_test.go:129: probing: 10000000 keys; 20000000 buckets; load factor 0.50
-	probing_bench_test.go:119: probing: 304.80MB
-ok  	github.com/kho/probing	36.224s
+BenchmarkGoMapSpeed	   20000	     73367 ns/op
+BenchmarkProbingMapSpeed	   20000	     64460 ns/op
+BenchmarkGoMapMem	       0	         0 ns/op
+--- BENCH: BenchmarkGoMapMem
+	probing_bench_test.go:143: go-map: 0.04MB
+BenchmarkProbingMapMem	       0	         0 ns/op
+--- BENCH: BenchmarkProbingMapMem
+	probing_bench_test.go:127: probing: 1000 keys; 2000 buckets; load factor 0.50
+	probing_bench_test.go:143: probing: 0.03MB
+ok  	github.com/kho/probing	4.167s
+PASS
+BenchmarkGoMapSpeed	   10000	    115724 ns/op
+BenchmarkProbingMapSpeed	   20000	     89159 ns/op
+BenchmarkGoMapMem	       0	         0 ns/op
+--- BENCH: BenchmarkGoMapMem
+	probing_bench_test.go:143: go-map: 36.59MB
+BenchmarkProbingMapMem	       0	         0 ns/op
+--- BENCH: BenchmarkProbingMapMem
+	probing_bench_test.go:127: probing: 1000000 keys; 2000000 buckets; load factor 0.50
+	probing_bench_test.go:143: probing: 30.52MB
+ok  	github.com/kho/probing	7.349s
+PASS
+BenchmarkGoMapSpeed	   10000	    137724 ns/op
+BenchmarkProbingMapSpeed	   10000	    100151 ns/op
+BenchmarkGoMapMem	       0	         0 ns/op
+--- BENCH: BenchmarkGoMapMem
+	probing_bench_test.go:143: go-map: 303.51MB
+BenchmarkProbingMapMem	       0	         0 ns/op
+--- BENCH: BenchmarkProbingMapMem
+	probing_bench_test.go:127: probing: 10000000 keys; 20000000 buckets; load factor 0.50
+	probing_bench_test.go:143: probing: 305.18MB
+ok  	github.com/kho/probing	37.895s
 ```
