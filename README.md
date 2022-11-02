@@ -16,6 +16,10 @@ To customize,
    of your choice;
 3. Copy these two files to your project and you are good to go!
 
+## License
+
+Public Domain: To the extent possible under law, [Ke Wu](https://github.com/kho) has waived all copyright and related or neighboring rights to [A linear probing hash map template in Go](https://github.com/kho/probing).
+
 ## Benchmark results (look-ups only)
 
 Summary: the probing hash table is,
